@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "AllAboutBase64": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}
