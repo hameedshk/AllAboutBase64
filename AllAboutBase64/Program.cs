@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 while (true)
 {
-    Console.WriteLine("Enter a string to encode:");
+    Console.WriteLine("Enter a string to decode:");
     string input = Console.ReadLine();
 
     bool isstringbase64 = isValidBase64(input);
@@ -25,20 +25,30 @@ while (true)
 }
 
 // Optional: entropy check to reduce false positives
-static bool IsProbablyBase64(string s)
+static bool IsProbablyBase64(string input)
 {
-    if (s.Length % 4 != 0 || s.Length < 8)// 8 is a reasonable minimum to expect the content actually came from meaningful binary/ text
+    if (input.Length % 4 != 0 || input.Length < 8)// 8 is a reasonable minimum to expect the content actually came from meaningful binary/ text
         return false;
 
     // Very naive heuristic: mostly printable after decode
     try
     {
-        var data = Convert.FromBase64String(s);
+        byte[] data = Convert.FromBase64String(input);
+        // Optional: skip very short results (likely random junk)
+        if (data.Length < 4) return false;
+
         string decoded = Encoding.UTF8.GetString(data);
+
+        if (decoded.Length < 6) return false;
+
         int printableCount = 0;
 
         foreach (char c in decoded)
+        {
+            if (!(char.IsLetterOrDigit(c) || c == '+' || c == '/' || c == '='))
+                return false;
             if (!char.IsControl(c)) printableCount++;
+        }
 
         return (printableCount * 100 / decoded.Length) > 80; // 80% printable
     }
